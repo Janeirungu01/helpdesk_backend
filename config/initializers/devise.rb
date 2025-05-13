@@ -29,7 +29,13 @@ Devise.setup do |config|
     ]
     
     jwt.expiration_time = 10.minutes.to_i
+
+    jwt.request_formats = {
+      user: [:json, :html, :any]
+    }
+    
   end
+
 
   # Configure the class responsible to send e-mails.
   # config.mailer = 'Devise::Mailer'
@@ -103,6 +109,10 @@ Devise.setup do |config|
   # may want to disable generating routes to Devise's sessions controller by
   # passing skip: :sessions to `devise_for` in your config/routes.rb
   config.skip_session_storage = [:http_auth]
+  # config.jwt.request_formats = {
+  #   user: [:any]
+  # }
+
 
   # config/initializers/devise.rb
   config.authentication_keys = [:username]

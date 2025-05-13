@@ -1,93 +1,88 @@
 # db/seeds.rb
-require 'securerandom'
 
-puts "Seeding users..."
+require 'faker'
+
+User.destroy_all
+
+BRANCHES = ["Fedha", "Utawala", "Machakos", "Kitengela", "Tassia"]
+USERTYPES = ["Client", "Agent", "Admin"]
 
 users = [
-  { email: 'admin@example.com', password: 'password', role: 'Admin', username: 'admin' },
-  { email: 'agent1@example.com', password: 'password', role: 'Agent', username: 'agent1' },
-  { email: 'agent2@example.com', password: 'password', role: 'Agent', username: 'agent2' }
+  {
+    email: "admin@example.com",
+    password: "password123",
+    username: "admin_user",
+    fullname: "Admin User",
+    usertype: "Admin",
+    branches: BRANCHES
+  },
+  {
+    email: "agent1@example.com",
+    password: "password123",
+    username: "agent_john",
+    fullname: "John Agent",
+    usertype: "Agent",
+    branches: ["Fedha", "Utawala"]
+  },
+  {
+    email: "client1@example.com",
+    password: "password123",
+    username: "client_jane",
+    fullname: "Jane Client",
+    usertype: "Client",
+    branches: ["Machakos"]
+  }
 ]
 
-
-# Add 7 clients
-7.times do |i|
+# Add 5 random clients and 3 random agents
+5.times do
   users << {
-    email: "client#{i + 1}@example.com",
-    password: 'password',
-    role: 'Client',
-    username: "userclient#{i + 1}"
+    email: Faker::Internet.unique.email,
+    password: "password123",
+    username: Faker::Internet.unique.username(specifier: 5..10),
+    fullname: Faker::Name.name,
+    usertype: "Client",
+    branches: [BRANCHES.sample]
+  }
+end
+
+3.times do
+  users << {
+    email: Faker::Internet.unique.email,
+    password: "password123",
+    username: Faker::Internet.unique.username(specifier: 5..10),
+    fullname: Faker::Name.name,
+    usertype: "Agent",
+    branches: BRANCHES.sample(2)
   }
 end
 
 users.each do |attrs|
-  user = User.find_or_initialize_by(email: attrs[:email])
-  user.password = attrs[:password]
-  user.role = attrs[:role]
-  user.jwt_jti = SecureRandom.uuid
-  user.save!
-end
-
-puts "✅ Seeded #{users.size} users successfully!"
-
-# Get references
-admin = User.find_by(email: 'admin@example.com')
-agents = User.where(role: 'Agent')
-clients = User.where(role: 'Client')
-
-# ---------------------- ADDING DEPARTMENTS ----------------------
-puts "Seeding departments..."
-
-departments_data = [
-  { name: "Radiology", visible: true },
-  { name: "Cardiology", visible: false }
-]
-
-departments_data.each do |dept|
-  Department.create!(name: dept[:name], visible: dept[:visible])
-end
-
-puts "✅ Seeded #{departments_data.size} departments successfully!"
-
-# ---------------------- SEEDING TICKETS ----------------------
-puts "Seeding tickets..."
-
-departments = Department.all.map(&:name) # Get department names from the database
-priorities = ["Low", "Medium", "High"]
-statuses = Ticket::STATUSES
-
-tickets = []
-
-clients.each_with_index do |client, idx|
-  2.times do |n|
-    ticket = Ticket.create!(
-      user: client,
-      subject: "Issue ##{n + 1} for #{client.email}",
-      department: departments.sample,
-      description: "This is a description of a problem faced by #{client.email}.",
-      priority: priorities.sample,
-      status: statuses.sample # Can also default to "Open"
-    )
-    tickets << ticket
-  end
-end
-
-puts "✅ Seeded #{tickets.size} tickets from clients."
-
-# Assign some tickets to agents
-puts "Assigning some tickets to agents..."
-
-tickets.sample(6).each_with_index do |ticket, idx|
-  agent = agents[idx % agents.count] # Alternate between agents
-  ticket.update!(assigned_agent_id: agent.id)
-  Notification.create!(
-    user: agent,
-    ticket: ticket,
-    message: "You have been assigned ticket ##{ticket.ticket_id}",
-    read: false
+  User.create!(
+    email: attrs[:email],
+    password: attrs[:password],
+    password_confirmation: attrs[:password],
+    username: attrs[:username],
+    fullname: attrs[:fullname],
+    usertype: attrs[:usertype],
+    branches: attrs[:branches]
   )
 end
 
-puts "✅ Assigned 6 tickets to agents with notifications."
+Article.create!([
+  {
+    question: "How to reset my password?",
+    answer: "Click on 'Forgot Password' at the login page.",
+    category: "Authentication",
+    tags: ["password", "reset", "login"]
+  },
+  {
+    question: "How to submit a ticket?",
+    answer: "Go to the Tickets page and click on 'Add Ticket'.",
+    category: "Support",
+    tags: ["ticket", "support"]
+  }
+])
 
-puts "🎉 Seeding complete!"
+
+puts "Seeded #{User.count} users."

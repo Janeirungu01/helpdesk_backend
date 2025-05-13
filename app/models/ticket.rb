@@ -1,10 +1,12 @@
-# app/models/ticket.rb
 class Ticket < ApplicationRecord
   STATUSES = %w[Open In\ Progress Resolved Closed]
 
   belongs_to :user
   belongs_to :assigned_agent, class_name: "User", optional: true
   has_many :notifications
+  has_one_attached :attachment
+  # user specific ticket filtering
+  belongs_to :created_by, class_name: "User", foreign_key: "created_by_id"
 
   validates :subject, :department, :description, :priority, presence: true
   validates :ticket_id, uniqueness: true

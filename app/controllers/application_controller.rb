@@ -1,6 +1,17 @@
 class ApplicationController < ActionController::API
   respond_to :json
   before_action :configure_permitted_parameters, if: :devise_controller?
+  before_action :log_authorization_header
+  
+  before_action do
+    puts "Format: #{request.format}, Content-Type: #{request.content_type}"
+    puts "Authorization: #{request.headers['Authorization']}"
+  end
+
+  def log_authorization_header
+    Rails.logger.debug "Authorization Header: #{request.headers['Authorization']}"
+  end
+
 
   protected
 
@@ -11,3 +22,4 @@ class ApplicationController < ActionController::API
   end
 
 end
+

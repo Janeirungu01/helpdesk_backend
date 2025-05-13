@@ -9,9 +9,7 @@ Rails.application.routes.draw do
   # get '/departments', to: 'departments#index'
 
   resources :departments, only: [:index, :show, :create, :update, :destroy]
-
-
-
+  
   resources :tickets, param: :id do
     member do
       patch :close
@@ -20,14 +18,8 @@ Rails.application.routes.draw do
     end
   end
 
+  resources :articles, only: [:index, :show, :create, :update, :destroy]
 
-  # Rails.application.routes.draw do
-  #   resources :departments
-  # end
-
-  
-  
-  
 
   resources :notifications, only: [:index] do
     member do

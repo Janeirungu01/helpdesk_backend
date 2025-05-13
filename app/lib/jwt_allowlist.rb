@@ -1,4 +1,3 @@
-#jwt_allowlist.rb
 class JwtAllowlist
     def self.jwt_revoked?(payload, user)
       user.jwt_jti != payload['jti']

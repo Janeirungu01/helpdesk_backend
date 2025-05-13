@@ -11,9 +11,11 @@ class User < ApplicationRecord
          :validatable,
          :jwt_authenticatable,
          jwt_revocation_strategy: JwtAllowlist
+      
 
   before_create :set_initial_jti
   has_many :notifications
+  has_many :tickets
 
   def self.find_for_database_authentication(warden_conditions)
     conditions = warden_conditions.dup

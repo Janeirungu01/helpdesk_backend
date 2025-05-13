@@ -2,6 +2,7 @@ class TicketsController < ApplicationController
     before_action :authenticate_user!
     before_action :set_ticket, only: [:show, :update, :close, :reopen, :assign]
     before_action :authorize_admin!, only: [:assign]
+    respond_to :json
   
     def index
       if current_user.role == "Admin"
@@ -11,7 +12,7 @@ class TicketsController < ApplicationController
       else
         @tickets = current_user.tickets
       end
-    
+     
       render json: @tickets
     end
   
@@ -82,7 +83,7 @@ class TicketsController < ApplicationController
     end
   
     def ticket_params
-      allowed = [:subject, :department, :description, :priority]
+      allowed = [:subject, :department, :description, :priority, :category, :attachment]
       allowed << :assigned_agent_id if current_user.role == "Admin"
       params.require(:ticket).permit(allowed)
     end
@@ -94,3 +95,48 @@ class TicketsController < ApplicationController
     end
 end
   
+
+# class TicketsController < ApplicationController
+#   before_action :set_ticket, only: [:show, :update, :destroy]
+
+#   def index
+#     tickets = Ticket.all
+#     render json: tickets
+#   end
+
+#   def show
+#     render json: @ticket
+#   end
+
+#   def create
+#     ticket = current_user.tickets.build(ticket_params)
+#     if ticket.save
+#       render json: ticket, status: :created
+#     else
+#       render json: ticket.errors, status: :unprocessable_entity
+#     end
+#   end
+
+#   def update
+#     if @ticket.update(ticket_params)
+#       render json: @ticket
+#     else
+#       render json: @ticket.errors, status: :unprocessable_entity
+#     end
+#   end
+
+#   def destroy
+#     @ticket.destroy
+#     head :no_content
+#   end
+
+#   private
+
+#   def set_ticket
+#     @ticket = Ticket.find(params[:id])
+#   end
+
+#   def ticket_params
+#     params.require(:ticket).permit(:subject, :description, :category, :priority, :status, :department, :branch, :attachment, :ticketId)
+#   end
+# end

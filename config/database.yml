@@ -9,7 +9,7 @@ development:
   <<: *default
   database: help_desk
   username: postgres
-  password: root
+  password: admin
   host: localhost
   port: 5432
 
@@ -17,7 +17,7 @@ test:
   <<: *default
   database: helpdesk_test
   username: postgres
-  password: root
+  password: admin
   host: localhost
   port: 5432
 
