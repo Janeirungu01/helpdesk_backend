@@ -1,5 +1,3 @@
-# db/seeds.rb
-
 require 'faker'
 
 User.destroy_all
