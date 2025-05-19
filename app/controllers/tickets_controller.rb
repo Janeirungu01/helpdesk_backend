@@ -98,15 +98,31 @@
   before_action :authenticate_user!
   before_action :set_ticket, only: [:show]
 
+  # def index
+  #   tickets = Ticket.includes(:created_by, :department).all
+  #   render json: tickets.as_json(
+  #     include: {
+  #       created_by: { only: [:id, :fullname, :username] },
+  #       department: { only: [:id, :name] }
+  #     }
+  #   )
+  # end
+
   def index
+  if current_user.role == 'Admin'
     tickets = Ticket.includes(:created_by, :department).all
-    render json: tickets.as_json(
-      include: {
-        created_by: { only: [:id, :fullname, :username] },
-        department: { only: [:id, :name] }
-      }
-    )
+  else
+    tickets = Ticket.includes(:created_by, :department).where(created_by: current_user)
   end
+
+  render json: tickets.as_json(
+    include: {
+      created_by: { only: [:id, :fullname, :username] },
+      department: { only: [:id, :name] }
+    }
+  )
+end
+
 
   def show
     render json: @ticket.as_json(

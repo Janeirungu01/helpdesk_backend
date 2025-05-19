@@ -22,7 +22,7 @@ end
 end
 
   resources :articles, only: [:index, :show, :create, :update, :destroy]
-
+  resources :branches, only: [:index, :create, :destroy]
 
   resources :notifications, only: [:index] do
     member do
