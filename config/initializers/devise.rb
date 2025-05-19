@@ -14,25 +14,22 @@ Devise.setup do |config|
   # Configure the e-mail address which will be shown in Devise::Mailer,
   # note that it will be overwritten if you use your own mailer class
   # with default "from" parameter.
-  config.mailer_sender = 'please-change-me-at-config-initializers-devise@example.com'
+  # config.mailer_sender = 'please-change-me-at-config-initializers-devise@example.com'
   config.navigational_formats = []
 
   config.jwt do |jwt|
-    jwt.secret = Rails.application.credentials.devise_jwt_secret_key
-
-    jwt.dispatch_requests = [
-      ['POST', %r{^/users/sign_in$}]
-    ]
-
-    jwt.revocation_requests = [
-      ['DELETE', %r{^/users/sign_out$}]
-    ]
-    
-    jwt.expiration_time = 10.minutes.to_i
-
-    jwt.request_formats = {
-      user: [:json, :html, :any]
-    }
+  # jwt.secret = Rails.application.credentials.devise[:jwt_secret_key] # or ENV
+  jwt.secret = Rails.application.credentials.devise_jwt_secret_key
+  # jwt.secret = '0cfa8d8543c9f89f894aca2a07834659a8d297cf2ef53d4ecae580fd06f139bdc70cdf4024d3601979c02192bf1a34ffc985b62b0f3396a4d9766df5f89d312d'
+  jwt.dispatch_requests = [['POST', %r{^/users/sign_in$}]]
+  jwt.revocation_requests = [['DELETE', %r{^/users/sign_out$}]]
+  jwt.expiration_time = 60.minutes.to_i 
+  # jwt.revocation_strategy = JwtAllowlist
+  
+#     # jwt.request_formats = {
+#     #   user: [:json, :html, :any, :multipart_form]
+#     # }
+#     jwt.request_formats = { user: [:json] }
     
   end
 
