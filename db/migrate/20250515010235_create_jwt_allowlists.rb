@@ -11,3 +11,9 @@ class CreateJwtAllowlist < ActiveRecord::Migration[8.0]
     add_index :jwt_allowlist, :jti, unique: true
   end
 end
+
+
+
+
+
+
