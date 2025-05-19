@@ -1,142 +1,217 @@
-class TicketsController < ApplicationController
-    before_action :authenticate_user!
-    before_action :set_ticket, only: [:show, :update, :close, :reopen, :assign]
-    before_action :authorize_admin!, only: [:assign]
-    respond_to :json
+# class TicketsController < ApplicationController
+#     before_action :authenticate_user!
+#     before_action :set_ticket, only: [:show, :update, :close, :reopen, :assign]
+#     before_action :authorize_admin!, only: [:assign]
+#     respond_to :json
   
-    def index
-      if current_user.role == "Admin"
-        @tickets = Ticket.all
-      elsif current_user.role == "Agent"
-        @tickets = Ticket.where(assigned_agent_id: current_user.id)
-      else
-        @tickets = current_user.tickets
-      end
+#     def index
+#       if current_user.role == "Admin"
+#         @tickets = Ticket.all
+#       elsif current_user.role == "Agent"
+#         @tickets = Ticket.where(assigned_agent_id: current_user.id)
+#       else
+#         @tickets = current_user.tickets
+#       end
      
-      render json: @tickets
-    end
+#       render json: @tickets
+#     end
   
-    def create
-      @ticket = current_user.tickets.build(ticket_params)
-      if @ticket.save
-        render json: { message: "Ticket created", ticket: @ticket }, status: :created
-      else
-        render json: { errors: @ticket.errors.full_messages }, status: :unprocessable_entity
-      end
-    end
+#     def create
+#       @ticket = current_user.tickets.build(ticket_params)
+#       if @ticket.save
+#         render json: { message: "Ticket created", ticket: @ticket }, status: :created
+#       else
+#         render json: { errors: @ticket.errors.full_messages }, status: :unprocessable_entity
+#       end
+#     end
   
-    def show
-      render json: @ticket
-    end
-  
-    def update
-      if ["Admin", "Agent"].include?(current_user.role)
-        @ticket.update(status: params[:status])
-        Notification.create!(
-          user: @ticket.user,
-          ticket: @ticket,
-          message: "Your ticket ##{@ticket.ticket_id} status changed to #{@ticket.status}",
-          read: false
-        )
+#     def show
+#       render json: @ticket
+#     end
 
-        render json: { message: "Ticket status updated", ticket: @ticket }
-      else
-        render json: { error: "Unauthorized" }, status: :unauthorized
-      end
-    end
-  
-    def close
-      @ticket.update(status: "Closed")
-      render json: { message: "Ticket closed", ticket: @ticket }
-    end
-  
-    def reopen
-      @ticket.update(status: "Open", notes: params[:notes])
-      render json: { message: "Ticket reopened", ticket: @ticket }
-    end
-
-    def assign    
-      agent = User.find_by(id: params[:agent_id], role: "Agent")
-      unless agent
-        return render json: { error: "Agent not found" }, status: :not_found
-      end
-    
-      if @ticket.update(assigned_agent_id: agent.id)
-        Notification.create!(
-          user: agent,
-          ticket: @ticket,
-          message: "You have been assigned ticket ##{@ticket.ticket_id}",
-          read: false
-        )
-        render json: { message: "Ticket assigned to agent", ticket: @ticket }
-      else
-        render json: { errors: @ticket.errors.full_messages }, status: :unprocessable_entity
-      end
-    end
     
   
-    private
-  
-    def set_ticket
-      @ticket = Ticket.find_by(ticket_id: params[:id])
-      render json: { error: "Ticket not found" }, status: :not_found unless @ticket
-    end
-  
-    def ticket_params
-      allowed = [:subject, :department, :description, :priority, :category, :attachment]
-      allowed << :assigned_agent_id if current_user.role == "Admin"
-      params.require(:ticket).permit(allowed)
-    end
+#     def update
+#       if ["Admin", "Agent"].include?(current_user.role)
+#         @ticket.update(status: params[:status])
+#         Notification.create!(
+#           user: @ticket.user,
+#           ticket: @ticket,
+#           message: "Your ticket ##{@ticket.ticket_id} status changed to #{@ticket.status}",
+#           read: false
+#         )
 
-    def authorize_admin!
-      unless current_user.role == "Admin"
-        render json: { error: "Unauthorized" }, status: :unauthorized
-      end
-    end
-end
+#         render json: { message: "Ticket status updated", ticket: @ticket }
+#       else
+#         render json: { error: "Unauthorized" }, status: :unauthorized
+#       end
+#     end
+  
+#     def close
+#       @ticket.update(status: "Closed")
+#       render json: { message: "Ticket closed", ticket: @ticket }
+#     end
+  
+#     def reopen
+#       @ticket.update(status: "Open", notes: params[:notes])
+#       render json: { message: "Ticket reopened", ticket: @ticket }
+#     end
+
+#     def assign    
+#       agent = User.find_by(id: params[:agent_id], role: "Agent")
+#       unless agent
+#         return render json: { error: "Agent not found" }, status: :not_found
+#       end
+    
+#       if @ticket.update(assigned_agent_id: agent.id)
+#         Notification.create!(
+#           user: agent,
+#           ticket: @ticket,
+#           message: "You have been assigned ticket ##{@ticket.ticket_id}",
+#           read: false
+#         )
+#         render json: { message: "Ticket assigned to agent", ticket: @ticket }
+#       else
+#         render json: { errors: @ticket.errors.full_messages }, status: :unprocessable_entity
+#       end
+#     end
+    
+  
+#     private
+  
+#     def set_ticket
+#       @ticket = Ticket.find_by(ticket_id: params[:id])
+#       render json: { error: "Ticket not found" }, status: :not_found unless @ticket
+#     end
+  
+#     def ticket_params
+#       allowed = [:subject, :department, :description, :priority, :category, :attachment, :branch, :status]
+#       allowed << :assigned_agent_id if current_user.role == "Admin"
+#       params.require(:ticket).permit(allowed)
+#     end
+
+#     def authorize_admin!
+#       unless current_user.role == "Admin"
+#         render json: { error: "Unauthorized" }, status: :unauthorized
+#       end
+#     end
+# end
   
 
 # class TicketsController < ApplicationController
-#   before_action :set_ticket, only: [:show, :update, :destroy]
+#   before_action :set_ticket, only: [:show, :update]
 
+#   # GET /tickets
 #   def index
-#     tickets = Ticket.all
-#     render json: tickets
+#     @tickets = Ticket.order(updated_at: :desc)
+#     render json: @tickets.as_json(methods: [:attachment_url])
 #   end
 
+#   # GET /tickets/:id
 #   def show
-#     render json: @ticket
+#     render json: @ticket.as_json(methods: [:attachment_url])
 #   end
 
+#   # POST /tickets
 #   def create
-#     ticket = current_user.tickets.build(ticket_params)
-#     if ticket.save
-#       render json: ticket, status: :created
+#     @ticket = Ticket.new(ticket_params)
+
+#     if @ticket.save
+#       render json: @ticket.as_json(methods: [:attachment_url]), status: :created
 #     else
-#       render json: ticket.errors, status: :unprocessable_entity
+#       Rails.logger.debug("Ticket save failed: #{@ticket.errors.full_messages}")
+#       render json: { error: @ticket.errors.full_messages.join(', ') }, status: :unprocessable_entity
 #     end
 #   end
 
+#   # PATCH/PUT /tickets/:id
 #   def update
 #     if @ticket.update(ticket_params)
-#       render json: @ticket
+#       render json: @ticket.as_json(methods: [:attachment_url])
 #     else
-#       render json: @ticket.errors, status: :unprocessable_entity
+#       Rails.logger.debug("Ticket update failed: #{@ticket.errors.full_messages}")
+#       render json: { error: @ticket.errors.full_messages.join(', ') }, status: :unprocessable_entity
 #     end
-#   end
-
-#   def destroy
-#     @ticket.destroy
-#     head :no_content
 #   end
 
 #   private
 
+#   # Use callbacks to share common setup
 #   def set_ticket
 #     @ticket = Ticket.find(params[:id])
+#   rescue ActiveRecord::RecordNotFound
+#     render json: { error: 'Ticket not found' }, status: :not_found
 #   end
 
+#   # Only allow a list of trusted parameters
 #   def ticket_params
-#     params.require(:ticket).permit(:subject, :description, :category, :priority, :status, :department, :branch, :attachment, :ticketId)
+#     params.require(:ticket).permit(
+#       :subject,
+#       :category,
+#       :department,
+#       :description,
+#       :priority,
+#       :status,
+#       :branch,
+#       :created_by_id,
+#       :attachment
+#     )
 #   end
 # end
+
+ class TicketsController < ApplicationController
+  before_action :authenticate_user!
+  before_action :set_ticket, only: [:show]
+
+  def index
+    tickets = Ticket.includes(:created_by, :department).all
+    render json: tickets.as_json(
+      include: {
+        created_by: { only: [:id, :name, :email, :username] },
+        department: { only: [:id, :name] } # ✅ add this
+      }
+    )
+  end
+
+  def show
+    render json: @ticket.as_json(
+      include: {
+        created_by: { only: [:id, :name, :email, :username] },
+        department: { only: [:id, :name] } # ✅ add this
+      }
+    )
+  end
+
+  def create
+    @ticket = Ticket.new(ticket_params)
+    @ticket.created_by = current_user
+    @ticket.user = current_user if @ticket.user.nil?
+
+    if @ticket.save
+      render json: @ticket.as_json(
+        include: {
+          created_by: { only: [:id, :name, :email, :username] },
+          department: { only: [:id, :name] } # ✅ add this
+        }
+      ), status: :created
+    else
+      render json: { errors: @ticket.errors.full_messages }, status: :unprocessable_entity
+    end
+  end
+
+  private
+
+  def ticket_params
+    params.require(:ticket).permit(
+      :subject, :description, :department_id,
+      :category, :priority, :branch, :status,
+      :attachment, :created_at, :updated_at
+    )
+  end
+
+  def set_ticket
+    @ticket = Ticket.find(params[:id])
+  rescue ActiveRecord::RecordNotFound
+    render json: { error: "Ticket not found" }, status: :not_found
+  end
+end

@@ -1,28 +1,22 @@
 class Ticket < ApplicationRecord
-  STATUSES = %w[Open In\ Progress Resolved Closed]
-
-  belongs_to :user
-  belongs_to :assigned_agent, class_name: "User", optional: true
-  has_many :notifications
-  has_one_attached :attachment
-  # user specific ticket filtering
+  # Associations
+  belongs_to :user 
+  belongs_to :department                      
   belongs_to :created_by, class_name: "User", foreign_key: "created_by_id"
+  belongs_to :assigned_agent, class_name: "User", foreign_key: "assigned_agent_id", optional: true
 
-  validates :subject, :department, :description, :priority, presence: true
-  validates :ticket_id, uniqueness: true
-  validates :status, inclusion: { in: STATUSES }
+  has_one_attached :attachment             
 
-  before_create :generate_ticket_id
-  after_initialize :set_default_status, if: :new_record?
+  # Validations
+  validates :subject, :department, :description, :branch, :category,:user_id, :created_by, :status, :priority, presence: true
+  # validates :ticket_id, uniqueness: true
 
-
-  private
-
-  def generate_ticket_id
-    self.ticket_id = "TCKT-#{SecureRandom.hex(4).upcase}"
+  def as_json(options = {})
+    super(options.merge(include: { department: { only: [:name] } }))
   end
 
-  def set_default_status
-    self.status ||= "Open"
+  # Instance Methods
+  def attachment_url
+    Rails.application.routes.url_helpers.rails_blob_url(attachment, only_path: true) if attachment.attached?
   end
 end
