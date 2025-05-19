@@ -6,17 +6,20 @@ Rails.application.routes.draw do
   defaults: { format: :json }
 
   get 'users/get_users', to: 'users/users#getUsers', as: :get_users
-  # get '/departments', to: 'departments#index'
 
   resources :departments, only: [:index, :show, :create, :update, :destroy]
   
-  resources :tickets, param: :id do
-    member do
-      patch :close
-      patch :reopen
-      patch :assign
-    end
+  resources :tickets do
+  member do
+    patch :close
+    patch :resolve
+    patch :reopen
+    patch :assign
   end
+    collection do
+  get :all_tickets
+end
+end
 
   resources :articles, only: [:index, :show, :create, :update, :destroy]
 
@@ -28,5 +31,6 @@ Rails.application.routes.draw do
   end
   
   get "up" => "rails/health#show", as: :rails_health_check
+
 
 end

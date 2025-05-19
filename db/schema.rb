@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_05_12_122230) do
+ActiveRecord::Schema[8.0].define(version: 2025_05_19_101511) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -79,7 +79,6 @@ ActiveRecord::Schema[8.0].define(version: 2025_05_12_122230) do
 
   create_table "tickets", force: :cascade do |t|
     t.string "subject"
-    t.string "department"
     t.text "description"
     t.string "priority"
     t.string "status"
@@ -91,6 +90,9 @@ ActiveRecord::Schema[8.0].define(version: 2025_05_12_122230) do
     t.integer "assigned_agent_id"
     t.string "category"
     t.string "branch"
+    t.integer "created_by_id"
+    t.bigint "department_id"
+    t.index ["department_id"], name: "index_tickets_on_department_id"
     t.index ["user_id"], name: "index_tickets_on_user_id"
   end
 
@@ -117,5 +119,6 @@ ActiveRecord::Schema[8.0].define(version: 2025_05_12_122230) do
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
   add_foreign_key "notifications", "tickets"
   add_foreign_key "notifications", "users"
+  add_foreign_key "tickets", "departments"
   add_foreign_key "tickets", "users"
 end
