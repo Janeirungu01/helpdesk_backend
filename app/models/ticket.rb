@@ -6,19 +6,21 @@ class Ticket < ApplicationRecord
 
   has_one_attached :attachment             
 
-  # Validations
-  # validates :subject, :department, :description, :branch, :category,:user_id, :created_by, :status, :priority, presence: true
   validates :subject, :description, :branch, :category, :user_id, :created_by_id, :department_id, :status, :priority, presence: true
 
   validates :ticket_id, uniqueness: true
 
   before_validation :generate_ticket_id, on: :create
 
-  def as_json(options = {})
-    super(options.merge(include: { department: { only: [:name] } }))
-  end
+def index
+  tickets = Ticket.includes(:department, :created_by).all
 
-  # Instance Methods
+  render json: tickets.as_json(include: {
+    department: { only: [:id, :name] },
+    created_by: { only: [:id, :name, :email] }
+  })
+end
+
   def attachment_url
     Rails.application.routes.url_helpers.rails_blob_url(attachment, only_path: true) if attachment.attached?
   end
@@ -27,6 +29,6 @@ class Ticket < ApplicationRecord
 
   def generate_ticket_id
     last_number = Ticket.maximum(:id).to_i + 1
-    self.ticket_id = "TKT-#{last_number.to_s.rjust(6, '0')}" # Example: TKT-000012
+    self.ticket_id = "TKT-#{last_number.to_s.rjust(6, '0')}" 
   end
 end

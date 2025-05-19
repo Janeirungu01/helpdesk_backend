@@ -12,7 +12,6 @@ class ApplicationController < ActionController::API
     Rails.logger.debug "Authorization Header: #{request.headers['Authorization']}"
   end
 
-
   protected
 
   def configure_permitted_parameters

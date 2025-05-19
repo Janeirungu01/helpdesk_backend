@@ -28,8 +28,6 @@
 #     def show
 #       render json: @ticket
 #     end
-
-    
   
 #     def update
 #       if ["Admin", "Agent"].include?(current_user.role)
@@ -76,7 +74,6 @@
 #       end
 #     end
     
-  
 #     private
   
 #     def set_ticket
@@ -97,68 +94,6 @@
 #     end
 # end
   
-
-# class TicketsController < ApplicationController
-#   before_action :set_ticket, only: [:show, :update]
-
-#   # GET /tickets
-#   def index
-#     @tickets = Ticket.order(updated_at: :desc)
-#     render json: @tickets.as_json(methods: [:attachment_url])
-#   end
-
-#   # GET /tickets/:id
-#   def show
-#     render json: @ticket.as_json(methods: [:attachment_url])
-#   end
-
-#   # POST /tickets
-#   def create
-#     @ticket = Ticket.new(ticket_params)
-
-#     if @ticket.save
-#       render json: @ticket.as_json(methods: [:attachment_url]), status: :created
-#     else
-#       Rails.logger.debug("Ticket save failed: #{@ticket.errors.full_messages}")
-#       render json: { error: @ticket.errors.full_messages.join(', ') }, status: :unprocessable_entity
-#     end
-#   end
-
-#   # PATCH/PUT /tickets/:id
-#   def update
-#     if @ticket.update(ticket_params)
-#       render json: @ticket.as_json(methods: [:attachment_url])
-#     else
-#       Rails.logger.debug("Ticket update failed: #{@ticket.errors.full_messages}")
-#       render json: { error: @ticket.errors.full_messages.join(', ') }, status: :unprocessable_entity
-#     end
-#   end
-
-#   private
-
-#   # Use callbacks to share common setup
-#   def set_ticket
-#     @ticket = Ticket.find(params[:id])
-#   rescue ActiveRecord::RecordNotFound
-#     render json: { error: 'Ticket not found' }, status: :not_found
-#   end
-
-#   # Only allow a list of trusted parameters
-#   def ticket_params
-#     params.require(:ticket).permit(
-#       :subject,
-#       :category,
-#       :department,
-#       :description,
-#       :priority,
-#       :status,
-#       :branch,
-#       :created_by_id,
-#       :attachment
-#     )
-#   end
-# end
-
  class TicketsController < ApplicationController
   before_action :authenticate_user!
   before_action :set_ticket, only: [:show]
@@ -167,8 +102,8 @@
     tickets = Ticket.includes(:created_by, :department).all
     render json: tickets.as_json(
       include: {
-        created_by: { only: [:id, :name, :email, :username] },
-        department: { only: [:id, :name] } # ✅ add this
+        created_by: { only: [:id, :fullname, :username] },
+        department: { only: [:id, :name] }
       }
     )
   end
@@ -177,7 +112,7 @@
     render json: @ticket.as_json(
       include: {
         created_by: { only: [:id, :name, :email, :username] },
-        department: { only: [:id, :name] } # ✅ add this
+        department: { only: [:id, :name] } 
       }
     )
   end
@@ -191,7 +126,7 @@
       render json: @ticket.as_json(
         include: {
           created_by: { only: [:id, :name, :email, :username] },
-          department: { only: [:id, :name] } # ✅ add this
+          department: { only: [:id, :name] }
         }
       ), status: :created
     else
