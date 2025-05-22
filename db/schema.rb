@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_05_19_210407) do
+ActiveRecord::Schema[8.0].define(version: 2025_05_20_035918) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -83,6 +83,16 @@ ActiveRecord::Schema[8.0].define(version: 2025_05_19_210407) do
     t.index ["user_id"], name: "index_notifications_on_user_id"
   end
 
+  create_table "refresh_tokens", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.string "token"
+    t.datetime "expires_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["token"], name: "index_refresh_tokens_on_token"
+    t.index ["user_id"], name: "index_refresh_tokens_on_user_id"
+  end
+
   create_table "tickets", force: :cascade do |t|
     t.string "subject"
     t.text "description"
@@ -125,6 +135,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_05_19_210407) do
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
   add_foreign_key "notifications", "tickets"
   add_foreign_key "notifications", "users"
+  add_foreign_key "refresh_tokens", "users"
   add_foreign_key "tickets", "departments"
   add_foreign_key "tickets", "users"
 end
