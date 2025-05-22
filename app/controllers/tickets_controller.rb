@@ -109,7 +109,7 @@
   # end
 
   def index
-  if current_user.role == 'Admin'
+  if current_user.usertype == 'Admin'
     tickets = Ticket.includes(:created_by, :department).all
   else
     tickets = Ticket.includes(:created_by, :department).where(created_by: current_user)
@@ -122,7 +122,6 @@
     }
   )
 end
-
 
   def show
     render json: @ticket.as_json(
