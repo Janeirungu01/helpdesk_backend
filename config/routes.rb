@@ -21,6 +21,8 @@ Rails.application.routes.draw do
 end
 end
 
+  resources :tickets, only: [:index, :show, :update]
+
   resources :articles, only: [:index, :show, :create, :update, :destroy]
   resources :branches, only: [:index, :create, :destroy]
 

@@ -6,7 +6,7 @@ class RefreshToken < ApplicationRecord
   def expired?
     Time.current > expires_at
   end
-
+  
   private
 
   def generate_token_and_expiry

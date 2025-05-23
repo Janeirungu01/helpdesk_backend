@@ -4,13 +4,12 @@ class Ticket < ApplicationRecord
   belongs_to :created_by, class_name: "User", foreign_key: "created_by_id"
   belongs_to :assigned_agent, class_name: "User", foreign_key: "assigned_agent_id", optional: true
 
-  #   TICKET_STATUSES = {
-  #   open: 'Open',
-  #   in_progress: 'In Progress',
-  #   resolved: 'Resolved',
-  #   closed: 'Closed',
-  #   reopened: 'Reopened'
-  # }, _default: 'Open'
+    STATUSES = {
+    open: "open",
+    resolved: "resolved",
+    reopened: "reopened",
+    closed: "closed"
+}.freeze
 
   has_one_attached :attachment             
 
@@ -18,28 +17,24 @@ class Ticket < ApplicationRecord
 
   validates :ticket_id, uniqueness: true
 
+  
+  validates :status, inclusion: {in: STATUSES.values}
+
+
   before_validation :generate_ticket_id, on: :create
 
-  #  def close!
-  #   update(status: :closed)
-  # end
+   def close!
+    update(status: :closed)
+  end
 
-  # def reopen!
-  #   update(status: :reopened)
-  # end
+  def reopen!
+    update(status: :reopened)
+  end
 
-  # def resolve!
-  #   update(status: :resolved)
-  # end
+  def resolve!
+    update(status: :resolved)
+  end
 
-def index
-  tickets = Ticket.includes(:department, :created_by).all
-
-  render json: tickets.as_json(include: {
-    department: { only: [:id, :name] },
-    created_by: { only: [:id, :name, :email] }
-  })
-end
 
   def attachment_url
     Rails.application.routes.url_helpers.rails_blob_url(attachment, only_path: true) if attachment.attached?
